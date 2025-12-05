@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Gleeful: Твоя территория радости</h1>
+    <p>Профессиональная организация праздников и мероприятий</p>
+    <a href="{{ url_for('services') }}" class="btn btn-primary">Смотреть услуги</a>
+</div>
+
+<div class="features">
+    <h2>Почему выбирают нас</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <i class="fas fa-star"></i>
+            <h3>Качество</h3>
+            <p>Только лучшие аниматоры и ведущие</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-heart"></i>
+            <h3>С душой</h3>
+            <p>Вкладываем любовь в каждый праздник</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-check"></i>
+            <h3>Надёжно</h3>
+            <p>Более 500 счастливых клиентов</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
