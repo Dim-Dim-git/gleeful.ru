@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Услуги{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Наши услуги</h1>
+    <p>Профессиональная организация праздников любой сложности</p>
+</div>
+
+<div class="services-grid">
+    {% for service in services %}
+    <div class="service-card">
+        {% if service.image_url %}
+        <img src="{{ service.image_url }}" alt="{{ service.title }}" class="service-image">
+        {% endif %}
+        <div class="service-content">
+            <h3>{{ service.title }}</h3>
+            <p class="service-category">{{ service.category }}</p>
+            <p>{{ service.description }}</p>
+            <p class="service-price">от {{ service.price }} ₽</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
