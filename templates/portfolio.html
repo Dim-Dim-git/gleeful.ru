@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+
+{% block title %}Наши работы{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для страницы портфолио */
+    .portfolio-page {
+        padding: 80px 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Заголовок страницы */
+    .page-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Фильтры категорий */
+    .portfolio-filters {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .filter-buttons {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 50px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-btn {
+        padding: 10px 25px;
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .filter-btn i {
+        color: var(--primary-yellow);
+    }
+
+    .filter-btn:hover i,
+    .filter-btn.active i {
+        color: var(--dark-blue);
+    }
+
+    /* Сетка портфолио */
+    .portfolio-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .portfolio-item {
+        position: relative;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        aspect-ratio: 1;
+    }
+
+    .portfolio-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .portfolio-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .portfolio-item:hover .portfolio-image {
+        transform: scale(1.1);
+    }
+
+    .portfolio-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.9) 0%, rgba(255, 107, 107, 0.85) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .portfolio-item:hover .portfolio-overlay {
+        opacity: 1;
+    }
+
+    .portfolio-overlay-content {
+        text-align: center;
+        color: white;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+    }
+
+    .portfolio-item:hover .portfolio-overlay-content {
+        transform: translateY(0);
+    }
+
+    .portfolio-overlay-title {
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .portfolio-overlay-category {
+        font-size: 1rem;
+        opacity: 0.95;
+    }
+
+    .portfolio-overlay-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    /* Lightbox модальное окно */
+    .lightbox {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .lightbox.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+    }
+
+    .lightbox-content {
+        max-width: 90%;
+        max-height: 90%;
+        position: relative;
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+    }
+
+    .lightbox.active .lightbox-content {
+        transform: scale(1);
+    }
+
+    .lightbox-image {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        background: rgba(255, 255, 255, 0.1);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lightbox-close:hover {
+        transform: rotate(90deg);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.1);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .lightbox-nav:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-prev {
+        left: -60px;
+    }
+
+    .lightbox-next {
+        right: -60px;
+    }
+
+    /* Версия для слабовидящих */
+    .accessibility-mode .page-title {
+        background: #ff0 !important;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    .accessibility-mode .portfolio-item {
+        border: 2px solid #000 !important;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1024px) {
+        .portfolio-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .portfolio-page {
+            padding: 60px 0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .portfolio-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .filter-buttons {
+            padding: 15px;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+        }
+
+        .lightbox-nav {
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+        }
+
+        .lightbox-prev {
+            left: 10px;
+        }
+
+        .lightbox-next {
+            right: 10px;
+        }
+
+        .lightbox-close {
+            top: 10px;
+            right: 10px;
+        }
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .portfolio-item {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .portfolio-item:nth-child(1) { animation-delay: 0.1s; }
+    .portfolio-item:nth-child(2) { animation-delay: 0.2s; }
+    .portfolio-item:nth-child(3) { animation-delay: 0.3s; }
+    .portfolio-item:nth-child(4) { animation-delay: 0.4s; }
+    .portfolio-item:nth-child(5) { animation-delay: 0.5s; }
+    .portfolio-item:nth-child(6) { animation-delay: 0.6s; }
+    .portfolio-item:nth-child(7) { animation-delay: 0.7s; }
+    .portfolio-item:nth-child(8) { animation-delay: 0.8s; }
+    .portfolio-item:nth-child(9) { animation-delay: 0.9s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-page">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Наши работы</h1>
+            <p class="page-subtitle">
+                Посмотрите, как Gleeful создает незабываемые праздники. Каждое событие — это уникальная история радости!
+            </p>
+        </div>
+
+        <div class="portfolio-filters">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-th"></i> Все работы
+                </button>
+                <button class="filter-btn" data-filter="Детский">
+                    <i class="fas fa-child"></i> Детские праздники
+                </button>
+                <button class="filter-btn" data-filter="Взрослый">
+                    <i class="fas fa-user-tie"></i> Взрослые мероприятия
+                </button>
+                <button class="filter-btn" data-filter="Корпоративный">
+                    <i class="fas fa-building"></i> Корпоративы
+                </button>
+            </div>
+        </div>
+
+        <div class="portfolio-grid">
+            {% for item in portfolio_items %}
+            <div class="portfolio-item" data-category="{{ item.category }}">
+                <img src="{{ item.image_url }}"
+                     alt="{{ item.title }}"
+                     class="portfolio-image">
+                <div class="portfolio-overlay">
+                    <div class="portfolio-overlay-content">
+                        <div class="portfolio-overlay-icon">
+                        </div>
+                        <div class="portfolio-overlay-title">{{ item.title }}</div>
+                        <div class="portfolio-overlay-category">{{ item.event_type }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <img src="" alt="Увеличенное изображение из портфолио Gleeful" class="lightbox-image" id="lightboxImage">
+        <span class="lightbox-nav lightbox-prev" id="lightboxPrev">&#10094;</span>
+        <span class="lightbox-nav lightbox-next" id="lightboxNext">&#10095;</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const portfolioItems = document.querySelectorAll('.portfolio-item');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    let currentIndex = 0;
+    let currentCategory = 'all';
+    let filteredItems = Array.from(portfolioItems);
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+
+            this.classList.add('active');
+
+            const filter = this.getAttribute('data-filter');
+            currentCategory = filter;
+
+            filteredItems = Array.from(portfolioItems).filter(item => {
+                if (filter === 'all') {
+                    return true;
+                }
+                return item.getAttribute('data-category') === filter;
+            });
+
+            portfolioItems.forEach((item, index) => {
+                if (filteredItems.includes(item)) {
+                    item.style.display = 'block';
+                    item.style.animation = 'fadeInUp 0.6s ease-out backwards';
+                    item.style.animationDelay = `${index * 0.1}s`;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const filterEvent = new CustomEvent('portfolioFiltered', {
+                detail: {
+                    category: filter,
+                    visibleItems: filteredItems,
+                    totalItems: portfolioItems.length
+                }
+            });
+            document.dispatchEvent(filterEvent);
+        });
+    });
+
+    portfolioItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const image = this.querySelector('.portfolio-image');
+            const imageUrl = image.src;
+
+            currentIndex = filteredItems.indexOf(this);
+
+            lightboxImage.src = imageUrl;
+
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            updateNavigationButtons();
+        });
+    });
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        lightboxImage.src = '';
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+
+    lightbox.addEventListener('click', function(e) {
+        if (e.target === lightbox) {
+            closeLightbox();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+
+    function showPreviousImage() {
+        currentIndex = (currentIndex - 1 + filteredItems.length) % filteredItems.length;
+        updateLightboxImage();
+    }
+
+    function showNextImage() {
+        currentIndex = (currentIndex + 1) % filteredItems.length;
+        updateLightboxImage();
+    }
+
+    function updateLightboxImage() {
+        const currentItem = filteredItems[currentIndex];
+        const image = currentItem.querySelector('.portfolio-image');
+
+        lightboxImage.style.opacity = '0';
+
+        setTimeout(() => {
+            lightboxImage.src = image.src;
+            lightboxImage.style.opacity = '1';
+            updateNavigationButtons();
+        }, 200);
+    }
+
+    function updateNavigationButtons() {
+        if (filteredItems.length > 1) {
+            lightboxPrev.style.display = 'flex';
+            lightboxNext.style.display = 'flex';
+        } else {
+            lightboxPrev.style.display = 'none';
+            lightboxNext.style.display = 'none';
+        }
+    }
+
+    lightboxPrev.addEventListener('click', showPreviousImage);
+    lightboxNext.addEventListener('click', showNextImage);
+
+    document.addEventListener('keydown', function(e) {
+        if (!lightbox.classList.contains('active')) return;
+
+        if (e.key === 'ArrowLeft') {
+            showPreviousImage();
+        } else if (e.key === 'ArrowRight') {
+            showNextImage();
+        }
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .lightbox-image {
+            transition: opacity 0.2s ease;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}
