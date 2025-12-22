@@ -1,32 +1,393 @@
 {% extends "base.html" %}
 
-{% block title %}Главная{% endblock %}
+{% block extra_css %}
+<style>
+    /* Hero секция */
+    .hero {
+        background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://static.photos/holiday/1920x1080/1') center/cover;
+        color: white;
+        text-align: center;
+        padding: 120px 0;
+        margin-bottom: 80px;
+        position: relative;
+    }
+
+    .hero h1 {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        animation: fadeInUp 1s ease-out;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero p {
+        font-size: 1.5rem;
+        margin-bottom: 40px;
+        opacity: 0.95;
+        animation: fadeInUp 1s ease-out 0.2s backwards;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        text-transform: uppercase;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        animation: fadeInUp 1s ease-out 0.4s backwards;
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Секция преимуществ */
+    .features {
+        padding: 80px 0;
+        background: #f8f9fa;
+        margin-bottom: 80px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px;
+        text-align: center;
+    }
+
+    .feature-card {
+        padding: 40px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .feature-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .feature-description {
+        font-size: 1.1rem;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    /* Секция услуг */
+    .services {
+        padding: 80px 0;
+        margin-bottom: 80px;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .service-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .service-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .service-content {
+        padding: 30px;
+    }
+
+    .service-category {
+        display: inline-block;
+        padding: 5px 15px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .service-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .service-price {
+        font-size: 1.3rem;
+        color: var(--secondary-pink);
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .service-description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .service-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        text-transform: uppercase;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .service-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    /* CTA секция */
+    .cta {
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        text-align: center;
+        padding: 80px 0;
+        margin-bottom: 0;
+    }
+
+    .cta h2 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .cta p {
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+        opacity: 0.95;
+    }
+
+    .cta-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: var(--white);
+        color: var(--secondary-pink);
+        text-transform: uppercase;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .cta-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Анимация */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Версия для слабовидящих */
+    .accessibility-mode .hero h1,
+    .accessibility-mode .feature-title,
+    .accessibility-mode .service-title,
+    .accessibility-mode .cta h2 {
+        color: #000 !important;
+        background: #ff0 !important;
+    }
+
+    .accessibility-mode .hero,
+    .accessibility-mode .cta {
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 992px) {
+        .hero h1 {
+            font-size: 2.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+        }
+
+        .features-grid,
+        .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero {
+            padding: 80px 0;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+        }
+
+        .features-grid,
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="hero">
-    <h1>Gleeful: Твоя территория радости</h1>
-    <p>Профессиональная организация праздников и мероприятий</p>
-    <a href="{{ url_for('services') }}" class="btn btn-primary">Смотреть услуги</a>
-</div>
-
-<div class="features">
-    <h2>Почему выбирают нас</h2>
-    <div class="feature-grid">
-        <div class="feature-card">
-            <i class="fas fa-star"></i>
-            <h3>Качество</h3>
-            <p>Только лучшие аниматоры и ведущие</p>
-        </div>
-        <div class="feature-card">
-            <i class="fas fa-heart"></i>
-            <h3>С душой</h3>
-            <p>Вкладываем любовь в каждый праздник</p>
-        </div>
-        <div class="feature-card">
-            <i class="fas fa-check"></i>
-            <h3>Надёжно</h3>
-            <p>Более 500 счастливых клиентов</p>
+<section class="hero" style="background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('{{ url_for('static', filename='images/upload/main1.jpg') }}') center/cover no-repeat;" role="img" aria-label="Фоновое изображение: праздничное оформление с шарами и конфетти">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Gleeful: Твоя территория радости!</h1>
+            <p>Превратим любой день в незабываемый праздник на gleeful.ru</p>
+            <a href="{{ url_for('services') }}" class="hero-btn">Смотреть услуги</a>
         </div>
     </div>
-</div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-glass-cheers"></i></div>
+                <h3 class="feature-title">500+ проведенных праздников</h3>
+                <p class="feature-description">
+                    Огромный опыт организации мероприятий: от дней рождения до корпоративных праздников
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-user-tie"></i></div>
+                <h3 class="feature-title">Профессиональные аниматоры</h3>
+                <p class="feature-description">
+                    Только лучшие специалисты с опытом работы от 5 лет и творческим подходом
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3 class="feature-title">Гибкие цены и скидки</h3>
+                <p class="feature-description">
+                    Индивидуальный подход к каждому клиенту и специальные предложения
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="services">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Популярные услуги</h2>
+            <p class="section-subtitle">
+                Выберите идеальный вариант для вашего праздника
+            </p>
+        </div>
+
+        <div class="services-grid">
+            {% for service in services[:3] %}
+            <div class="service-card">
+                <img src="{{ service.image_url or 'https://static.photos/people/640x480/' ~ loop.index }}"
+                     alt="{{ service.title }} - пример проведения мероприятия"
+                     class="service-image">
+
+                <div class="service-content">
+                    <span class="service-category">{{ service.category }}</span>
+                    <h3 class="service-title">{{ service.title }}</h3>
+                    <div class="service-price">от {{ "{:,.0f}".format(service.price).replace(',', ' ') }} ₽</div>
+
+                    <p class="service-description">
+                        {% if service.description|length > 120 %}
+                            {{ service.description[:120] }}...
+                        {% else %}
+                            {{ service.description }}
+                        {% endif %}
+                    </p>
+
+                    <a href="{{ url_for('service_detail', id=service.id) }}" class="service-btn">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>Готовы заказать праздник?</h2>
+        <p>
+            Свяжитесь с нами прямо сейчас и получите бесплатную консультацию по организации вашего мероприятия
+        </p>
+        <a href="{{ url_for('contacts') }}" class="cta-btn">
+            Связаться с нами
+        </a>
+    </div>
+</section>
 {% endblock %}

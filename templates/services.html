@@ -1,26 +1,245 @@
 {% extends "base.html" %}
 
-{% block title %}Услуги{% endblock %}
+{% block title %}Наши услуги{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Берем стили фильтров прямо из портфолио для единообразия */
+    .services-page { padding: 80px 0; min-height: calc(100vh - 200px); }
+    .page-header { text-align: center; margin-bottom: 60px; }
+    .page-title { font-size: 3rem; font-weight: bold; margin-bottom: 20px; background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .filters { text-align: center; margin-bottom: 50px; }
+    .filter-buttons { display: inline-flex; flex-wrap: wrap; gap: 15px; justify-content: center; padding: 20px; background: #f8f9fa; border-radius: 50px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); }
+
+    .filter-btn { padding: 12px 25px; background: white; color: #666; border: 2px solid #e0e0e0; border-radius: 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+
+    /* Стили анимации из портфолио */
+    .service-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .service-card.hidden { opacity: 0; transform: scale(0.8); display: none; }
+
+    /* Остальные ваши стили карточек... */
+    .service-card { background: white; border-radius: var(--border-radius); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .service-image { height: 200px; position: relative; }
+    .service-image img { width: 100%; height: 100%; object-fit: cover; }
+    .service-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+    .service-price { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; color: var(--secondary-pink); }
+
+    .add-to-cart {
+        margin-top: auto;
+        padding: 12px 24px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .add-to-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        background: linear-gradient(45deg, var(--secondary-pink), var(--primary-yellow));
+    }
+
+    .add-to-cart:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .add-to-cart:focus {
+        outline: 3px solid var(--primary-yellow);
+        outline-offset: 2px;
+    }
+
+    .filter-btn i {
+        color: var(--primary-yellow);
+    }
+
+    .filter-btn:hover i,
+    .filter-btn.active i {
+        color: var(--dark-blue);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Наши услуги</h1>
-    <p>Профессиональная организация праздников любой сложности</p>
-</div>
+<div class="services-page">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Наши услуги</h1>
+        </div>
 
-<div class="services-grid">
-    {% for service in services %}
-    <div class="service-card">
-        {% if service.image_url %}
-        <img src="{{ service.image_url }}" alt="{{ service.title }}" class="service-image">
-        {% endif %}
-        <div class="service-content">
-            <h3>{{ service.title }}</h3>
-            <p class="service-category">{{ service.category }}</p>
-            <p>{{ service.description }}</p>
-            <p class="service-price">от {{ service.price }} ₽</p>
+        <div class="filters" role="region" aria-label="Фильтры услуг">
+            <h2 class="sr-only">Фильтрация услуг</h2>
+            <div class="filter-buttons" role="group" aria-label="Категории услуг">
+                <button class="filter-btn active"
+                        data-filter="all"
+                        aria-pressed="true"
+                        aria-label="Показать все услуги">
+                    <i class="fas fa-th" aria-hidden="true"></i> Все услуги
+                </button>
+                <button class="filter-btn"
+                        data-filter="Детский"
+                        aria-pressed="false"
+                        aria-label="Показать детские услуги">
+                    <i class="fas fa-child" aria-hidden="true"></i> Детские
+                </button>
+                <button class="filter-btn"
+                        data-filter="Взрослый"
+                        aria-pressed="false"
+                        aria-label="Показать услуги для взрослых">
+                    <i class="fas fa-user-tie" aria-hidden="true"></i> Взрослые
+                </button>
+                <button class="filter-btn"
+                        data-filter="Корпоративный"
+                        aria-pressed="false"
+                        aria-label="Показать корпоративные услуги">
+                    <i class="fas fa-building" aria-hidden="true"></i> Корпоративные
+                </button>
+            </div>
+        </div>
+
+        <div class="services-grid">
+            {% for service in services %}
+            <div class="service-card {{ service.category }}">
+                <div class="service-image">
+                    <img src="{{ service.image_url }}" alt="{{ service.title }}">
+                </div>
+                <div class="service-content">
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.description }}</p>
+                    <div class="service-price">от {{ "{:,.0f}".format(service.price).replace(',', ' ') }} ₽</div>
+                    <button class="add-to-cart" data-id="{{ service.id }}">В корзину</button>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-    {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const items = document.querySelectorAll('.service-card');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                button.click();
+            }
+        });
+
+        button.addEventListener('click', () => {
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+
+            button.classList.add('active');
+            button.setAttribute('aria-pressed', 'true');
+
+            const filter = button.getAttribute('data-filter');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                if (filter === 'all' || item.classList.contains(filter)) {
+                    item.classList.remove('hidden');
+                    item.style.display = '';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'scale(1)';
+                    }, 10);
+                    visibleCount++;
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        item.classList.add('hidden');
+                        item.style.display = 'none';
+                    }, 400);
+                }
+            });
+
+            const filterText = button.textContent.trim();
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.setAttribute('aria-atomic', 'true');
+            announcement.className = 'sr-only';
+            announcement.textContent = `Показано ${visibleCount} услуг в категории "${filterText}"`;
+
+            document.body.appendChild(announcement);
+            setTimeout(() => {
+                if (announcement.parentNode) {
+                    document.body.removeChild(announcement);
+                }
+            }, 2000);
+        });
+    });
+
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const serviceId = this.getAttribute('data-id');
+
+            if (!serviceId) {
+                console.error('Нет ID услуги');
+                return;
+            }
+
+            fetch(`/cart/add/${serviceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: ''
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text();
+                }
+            })
+            .then(html => {
+                if (html) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при добавлении в корзину:', error);
+                window.location.href = `/cart/add/${serviceId}`;
+            });
+        });
+
+        button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                button.click();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
