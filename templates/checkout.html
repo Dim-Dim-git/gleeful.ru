@@ -1,0 +1,772 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для страницы оформления заказа */
+    .checkout-page {
+        padding: 80px 0;
+        min-height: calc(100vh - 200px);
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff9e6 100%);
+    }
+
+    /* Заголовок страницы */
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+    }
+
+    /* Контейнер оформления */
+    .checkout-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    /* Шаги оформления */
+    .checkout-steps {
+        display: flex;
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        padding: 0;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 20px 15px;
+        position: relative;
+    }
+
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #e0e0e0;
+        color: #999;
+        border-radius: 50%;
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .step.active .step-number {
+        background: linear-gradient(45deg, #FFD700, #FFA500);
+        color: white;
+    }
+
+    .step.completed .step-number {
+        background: #28a745;
+        color: white;
+    }
+
+    .step-title {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .step.active .step-title {
+        color: #FFD700;
+    }
+
+    .step.completed .step-title {
+        color: #28a745;
+    }
+
+    /* Содержимое формы */
+    .checkout-content {
+        padding: 40px;
+    }
+
+    /* Форма оформления */
+    .checkout-form {
+        margin-bottom: 40px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: #ff4757;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--tertiary-teal);
+        box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+    }
+
+    .form-control[readonly] {
+        background: #f8f9fa;
+        color: #666;
+        cursor: default;
+    }
+
+    .form-control.error {
+        border-color: #ff4757;
+        box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+    }
+
+    .error-message {
+        color: #ff4757;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .form-control.error + .error-message {
+        display: block;
+    }
+
+    /* Список услуг */
+    .services-summary {
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 2px solid #f0f0f0;
+    }
+
+    .services-summary-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .service-summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .service-summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .service-summary-info {
+        flex: 1;
+    }
+
+    .service-summary-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .service-summary-category {
+        display: inline-block;
+        padding: 3px 10px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: lowercase;
+    }
+
+    .service-summary-price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--secondary-pink);
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        min-width: 120px;
+        text-align: right;
+    }
+
+    /* Итоговая сумма */
+    .checkout-summary {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-radius: 15px;
+        padding: 30px;
+        border: 2px solid #FFD700;
+        margin-bottom: 40px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .summary-row:last-child {
+        margin-bottom: 0;
+        padding-top: 20px;
+        border-top: 2px solid #FFD700;
+        margin-top: 20px;
+    }
+
+    .summary-label {
+        font-weight: 600;
+        color: #666;
+    }
+
+    .summary-value {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .summary-total {
+        font-size: 2rem;
+        font-weight: bold;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Кнопка оформления */
+    .checkout-actions {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .checkout-btn {
+        display: inline-block;
+        padding: 18px 50px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border: none;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .checkout-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+    }
+
+    .checkout-btn:disabled {
+        background: #ccc;
+        cursor: default;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .checkout-btn.loading {
+        color: transparent;
+    }
+
+    .checkout-btn.loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spinner 0.6s linear infinite;
+    }
+
+    /* Кнопка отмены */
+    .cancel-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        margin-left: 20px;
+    }
+
+    .cancel-btn:hover {
+        border-color: #ff4757;
+        color: #ff4757;
+        transform: translateY(-2px);
+    }
+
+    /* Вспомогательные сообщения */
+    .help-text {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid;
+    }
+
+    .alert-info {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        color: #1565c0;
+    }
+
+    /* Версия для слабовидящих */
+    .accessibility-mode .page-title,
+    .accessibility-mode .form-section-title {
+        background: #ff0 !important;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    .accessibility-mode .checkout-container,
+    .accessibility-mode .form-control {
+        border: 2px solid #000 !important;
+        background: #fff !important;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1024px) {
+        .page-title {
+            font-size: 2.5rem;
+        }
+
+        .checkout-content {
+            padding: 30px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .checkout-page {
+            padding: 60px 0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .checkout-steps {
+            flex-direction: column;
+        }
+
+        .step {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .checkout-content {
+            padding: 20px;
+        }
+
+        .services-summary,
+        .checkout-summary {
+            padding: 20px;
+        }
+
+        .checkout-actions {
+            text-align: center;
+        }
+
+        .checkout-btn,
+        .cancel-btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .summary-total {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Анимации */
+    @keyframes spinner {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .checkout-container {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .service-summary-item {
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+
+    .service-summary-item:nth-child(1) { animation-delay: 0.1s; }
+    .service-summary-item:nth-child(2) { animation-delay: 0.2s; }
+    .service-summary-item:nth-child(3) { animation-delay: 0.3s; }
+    .service-summary-item:nth-child(4) { animation-delay: 0.4s; }
+    .service-summary-item:nth-child(5) { animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Оформление заказа</h1>
+            <p class="page-subtitle">Последний шаг к вашему идеальному празднику в Gleeful!</p>
+        </div>
+
+        <div class="checkout-container">
+            <div class="checkout-steps">
+                <div class="step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="step-title">Корзина</div>
+                </div>
+                <div class="step active">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Оформление</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Подтверждение</div>
+                </div>
+            </div>
+
+            <div class="checkout-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Заполните форму ниже для оформления заказа. Наш менеджер свяжется с вами в ближайшее время для подтверждения деталей.
+                </div>
+
+                <form method="POST" class="checkout-form" id="checkoutForm">
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <i class="fas fa-user"></i> Контактная информация
+                        </h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contact_phone" class="form-label required">
+                                    Контактный телефон
+                                </label>
+                                <input type="tel"
+                                       id="contact_phone"
+                                       name="contact_phone"
+                                       class="form-control"
+                                       placeholder="89991234567"
+                                       required
+                                       minlength="10"
+                                       maxlength="14">
+                                <div class="help-text">Введите номер телефона (10-14 цифр)</div>
+                                <div class="error-message">Пожалуйста, введите корректный номер телефона (минимум 10 цифр)</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="event_date" class="form-label required">
+                                    Дата праздника
+                                </label>
+                                <input type="date"
+                                       id="event_date"
+                                       name="event_date"
+                                       class="form-control"
+                                       required
+                                       min="">
+                                <div class="help-text">Выберите желаемую дату проведения мероприятия</div>
+                                <div class="error-message">Пожалуйста, выберите дату</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="special_requests" class="form-label">
+                                Особые пожелания
+                            </label>
+                            <textarea id="special_requests"
+                                      name="special_requests"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Расскажите о ваших особых пожеланиях по организации праздника..."></textarea>
+                            <div class="help-text">Необязательно, но поможет нам лучше подготовиться</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <i class="fas fa-list"></i> Заказанные услуги
+                        </h2>
+
+                        <div class="services-summary">
+                            <div class="services-summary-title">
+                                <i class="fas fa-check-circle"></i>
+                                Услуги в вашем заказе
+                            </div>
+
+                            {% for item in cart_items %}
+                            <div class="service-summary-item">
+                                <div class="service-summary-info">
+                                    <div class="service-summary-name">{{ item.title }}</div>
+                                    <span class="service-summary-category">{{ item.category }}</span>
+                                </div>
+                                <div class="service-summary-price">
+                                    {{  "{:,.0f}".format(item.price).replace(",", " ") }} ₽
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="checkout-summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Количество услуг:</span>
+                            <span class="summary-value">
+                                {{ cart_items|length }} {{ 'штук' if cart_items|length > 4 else 'штуки' if cart_items|length > 1 else 'штука' }}
+                            </span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Доставка и подготовка:</span>
+                            <span class="summary-value">Бесплатно</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Итого к оплате:</span>
+                            <span class="summary-total">{{  "{:,.0f}".format(total).replace(",", " ") }} ₽</span>
+                        </div>
+                    </div>
+
+                    <div class="checkout-actions">
+                        <button type="submit" class="checkout-btn" id="submitBtn">
+                            <i class="fas fa-check"></i>
+                            <span class="btn-text">Подтвердить заказ</span>
+                        </button>
+                        <a href="{{ url_for('cart') }}" class="cancel-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Вернуться в корзину
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('event_date');
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    dateInput.min = tomorrow.toISOString().split('T')[0];
+
+    const phoneInput = document.getElementById('contact_phone');
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length > 14) {
+            value = value.slice(0, 14);
+        }
+
+        e.target.value = value;
+    });
+
+    const form = document.getElementById('checkoutForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        btnText.textContent = 'Оформление...';
+
+        form.submit();
+    });
+
+    function validateForm() {
+        let isValid = true;
+
+        const phoneInput = document.getElementById('contact_phone');
+        const phoneDigits = phoneInput.value.replace(/\D/g, '');
+
+        if (phoneDigits.length < 10) {
+            phoneInput.classList.add('error');
+            isValid = false;
+        } else {
+            phoneInput.classList.remove('error');
+        }
+
+        const dateInput = document.getElementById('event_date');
+        const selectedDate = new Date(dateInput.value);
+        const minDate = new Date(dateInput.min);
+
+        if (!dateInput.value || selectedDate < minDate) {
+            dateInput.classList.add('error');
+            isValid = false;
+        } else {
+            dateInput.classList.remove('error');
+        }
+
+        return isValid;
+    }
+
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('error');
+        });
+    });
+
+    function showNotification(message, type = 'info') {
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+            background: ${type === 'success' ? 'linear-gradient(45deg, #28a745, #20c997)' : 'linear-gradient(45deg, #dc3545, #c82333)'};
+        `;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            ${message}
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slideOutRight 0.3s ease-in forwards';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

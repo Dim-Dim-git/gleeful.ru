@@ -1,0 +1,1584 @@
+{% extends "base.html" %}
+
+{% block title %}Панель администратора{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    /* Стили для шапки (как на основном сайте) */
+    .header {
+        background: #2C3E50 !important;
+        color: #fff !important;
+        padding: 0.5rem 0 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1000 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .header-content {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 2rem !important;
+    }
+
+    .logo {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+    }
+
+    .logo a {
+        text-decoration: none !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.3rem !important;
+    }
+
+    .logo i {
+        font-size: 1.8rem !important;
+        color: #FFD700 !important;
+    }
+
+    .logo .logo-glee {
+        color: #fff !important;
+        font-weight: 700 !important;
+    }
+
+    .logo .logo-ful {
+        color: #FF6B6B !important;
+        font-style: italic !important;
+    }
+
+    .main-nav {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        flex: 1 !important;
+    }
+
+    .nav-list {
+        display: flex !important;
+        list-style: none !important;
+        gap: 0.5rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .nav-link {
+        color: #fff !important;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+        padding: 0.2rem 0.6rem !important;
+        border-radius: 20px !important;
+        font-size: 0.85rem !important;
+        white-space: nowrap !important;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #FFD700 !important;
+    }
+
+    .nav-link i {
+        color: #FFD700 !important;
+    }
+
+    .user-panel {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.3rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .user-link {
+        color: #fff !important;
+        text-decoration: none !important;
+        font-size: 0.9rem !important;
+        padding: 0.3rem 0.6rem !important;
+        border-radius: 20px !important;
+        white-space: nowrap !important;
+    }
+
+    .user-link:hover {
+        color: #FFD700 !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .user-link i {
+        color: #FFD700 !important;
+    }
+
+    .cart-link {
+        position: relative !important;
+    }
+
+    .cart-badge {
+        position: absolute !important;
+        top: -8px !important;
+        right: -8px !important;
+        background: #4ECDC4 !important;
+        color: #fff !important;
+        border-radius: 50% !important;
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 0.7rem !important;
+        font-weight: bold !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: 2px solid white !important;
+        z-index: 10 !important;
+    }
+
+    .cart-badge.show {
+        display: flex !important;
+    }
+
+    /* Основные стили админки */
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff9e6 100%);
+        min-height: 100vh;
+    }
+
+    .admin-container {
+        padding: 80px 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Заголовок */
+    .admin-header {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .admin-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .admin-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* Табы */
+    .admin-tabs {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .tab-navigation {
+        display: flex;
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-bottom: 3px solid var(--primary-yellow);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 20px;
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .tab-btn:hover {
+        background: rgba(255, 215, 0, 0.1);
+    }
+
+    .tab-btn.active {
+        color: var(--primary-yellow);
+        background: white;
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary-yellow);
+    }
+
+    .tab-icon {
+        font-size: 1.3rem;
+    }
+
+    /* Контент табов */
+    .tab-content {
+        padding: 40px;
+        min-height: 500px;
+    }
+
+    .tab-pane {
+        display: none;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* Кнопка добавления */
+    .action-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .tab-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+
+    .add-btn {
+        padding: 12px 25px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Таблицы */
+    .admin-table {
+        width: 100%;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .admin-table table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .admin-table th {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .admin-table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.95rem;
+    }
+
+    .admin-table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .admin-table tbody tr:hover {
+        background-color: #fafafa;
+    }
+
+    /* Статусы */
+    .status-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-new {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-processing {
+        background: var(--primary-yellow);
+        color: var(--dark-blue);
+    }
+
+    .status-completed {
+        background: var(--secondary-pink);
+        color: white;
+    }
+
+    .status-cancelled {
+        background: #666;
+        color: white;
+    }
+
+    /* Категории */
+    .category-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: none;
+    }
+
+    .category-Детский {
+        background: linear-gradient(45deg, #ff69b4, #ff1493);
+        color: white;
+    }
+
+    .category-Взрослый {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        color: white;
+    }
+
+    .category-Корпоративный {
+        background: linear-gradient(45deg, #17a2b8, #138496);
+        color: white;
+    }
+
+    /* Кнопки действий */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-status {
+        background: linear-gradient(45deg, #ffc107, #e0a800);
+        color: white;
+        position: relative;
+    }
+
+    /* Модальные окна */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal.show {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto !important;
+    }
+
+    .modal.show * {
+        pointer-events: auto !important;
+    }
+
+    .modal-dialog {
+        pointer-events: auto !important;
+    }
+
+    .modal-body {
+        pointer-events: auto !important;
+    }
+
+    .form-control, .form-select {
+        pointer-events: auto !important;
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+    }
+
+    .modal-dialog {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .modal-header {
+        padding: 30px 30px 20px;
+        border-bottom: 2px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .modal-footer {
+        padding: 20px 30px 30px;
+        border-top: 2px solid #f0f0f0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+
+    .btn-cancel {
+        padding: 10px 25px;
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        border-color: #999;
+        color: #333;
+    }
+
+    .btn-save {
+        padding: 10px 25px;
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Формы */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--tertiary-teal);
+        box-shadow: 0 0 0 0.2rem rgba(78, 205, 196, 0.25);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--tertiary-teal);
+        box-shadow: 0 0 0 0.2rem rgba(78, 205, 196, 0.25);
+    }
+
+    /* Статус селект */
+    .status-select {
+        min-width: 150px;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        background: white !important;
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .status-select:hover {
+        border-color: var(--tertiary-teal) !important;
+        box-shadow: 0 0 0 0.2rem rgba(78, 205, 196, 0.25) !important;
+    }
+
+    .status-select:focus {
+        outline: none !important;
+        border-color: var(--tertiary-teal) !important;
+        box-shadow: 0 0 0 0.2rem rgba(78, 205, 196, 0.25) !important;
+    }
+
+    .status-select option {
+        padding: 8px !important;
+        background: white !important;
+        color: #333 !important;
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        color: #666;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--primary-yellow);
+        margin-bottom: 30px;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .empty-text {
+        font-size: 1rem;
+        margin-bottom: 30px;
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Миниатюры портфолио */
+    .portfolio-thumb {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+    }
+
+    .preview-placeholder {
+        color: #999;
+        font-style: italic;
+    }
+
+    .image-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px dashed #e0e0e0;
+    }
+
+    @keyframes slideDown {
+        from {
+            max-height: 0;
+            opacity: 0;
+        }
+        to {
+            max-height: 500px;
+            opacity: 1;
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 60px 0;
+        }
+
+        .admin-header {
+            padding: 30px 20px;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+        }
+
+        .tab-navigation {
+            flex-direction: column;
+        }
+
+        .tab-btn {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tab-btn.active {
+            border-bottom: 3px solid var(--primary-yellow);
+        }
+
+        .action-header {
+            flex-direction: column;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .tab-content {
+            padding: 20px;
+        }
+
+        .admin-table {
+            font-size: 0.9rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 10px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .modal-dialog {
+            width: 95%;
+            margin: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="admin-title">
+                <i class="fas fa-cog me-3"></i>
+                Панель администратора
+            </h1>
+            <p class="admin-subtitle">
+                Управление услугами, новостями и заказами Gleeful
+            </p>
+        </div>
+
+        <div class="admin-tabs">
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="showTab('orders')">
+                    <i class="fas fa-shopping-cart tab-icon"></i>
+                    Заказы
+                </button>
+                <button class="tab-btn" onclick="showTab('news')">
+                    <i class="fas fa-newspaper tab-icon"></i>
+                    Новости
+                </button>
+                <button class="tab-btn" onclick="showTab('services')">
+                    <i class="fas fa-list tab-icon"></i>
+                    Услуги
+                </button>
+                <button class="tab-btn" onclick="showTab('portfolio')">
+                    <i class="fas fa-images tab-icon"></i>
+                    Портфолио
+                </button>
+            </div>
+
+            <div class="tab-content">
+                <div id="orders-tab" class="tab-pane active">
+                    <div class="action-header">
+                        <h2 class="tab-title">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Управление заказами
+                        </h2>
+                    </div>
+
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Клиент</th>
+                                    <th>Телефон</th>
+                                    <th>Дата праздника</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order, user in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ user.username if user else 'Неизвестно' }}</td>
+                                    <td>{{ order.contact_phone or 'Не указан' }}</td>
+                                    <td>{{ order.event_date.strftime('%d.%m.%Y') if order.event_date else 'Не указана' }}</td>
+                                    <td>{{  "{:,.0f}".format(order.total_price).replace(",", " ") }} ₽</td>
+                                    <td>
+                                        <span class="status-badge status-{{ order.status|lower }}">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <select class="form-select status-select" onchange="updateOrderStatus({{ order.id }}, this.value)">
+                                            <option value="Новый" {% if order.status == 'Новый' %}selected{% endif %}>Новый</option>
+                                            <option value="В обработке" {% if order.status == 'В обработке' %}selected{% endif %}>В обработке</option>
+                                            <option value="Подтвержден" {% if order.status == 'Подтвержден' %}selected{% endif %}>Подтвержден</option>
+                                            <option value="Выполнен" {% if order.status == 'Выполнен' %}selected{% endif %}>Выполнен</option>
+                                            <option value="Завершен" {% if order.status == 'Завершен' %}selected{% endif %}>Завершен</option>
+                                            <option value="Отменен" {% if order.status == 'Отменен' %}selected{% endif %}>Отменен</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="news-tab" class="tab-pane">
+                    <div class="action-header">
+                        <h2 class="tab-title">
+                            <i class="fas fa-newspaper me-2"></i>
+                            Управление новостями
+                        </h2>
+                        <button class="add-btn" onclick="openNewsModal()">
+                            <i class="fas fa-plus"></i>
+                            Добавить новость
+                        </button>
+                    </div>
+
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Заголовок</th>
+                                    <th>Дата публикации</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for news_item in news %}
+                                <tr>
+                                    <td>{{ news_item.id }}</td>
+                                    <td>{{ news_item.title }}</td>
+                                    <td>{{ news_item.date_posted.strftime('%d.%m.%Y') }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action btn-edit" onclick="editNews({{ news_item.id }})">
+                                                <i class="fas fa-edit"></i>
+                                                Редактировать
+                                            </button>
+                                            <button class="btn-action btn-delete" onclick="deleteNews({{ news_item.id }})">
+                                                <i class="fas fa-trash"></i>
+                                                Удалить
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="services-tab" class="tab-pane">
+                    <div class="action-header">
+                        <h2 class="tab-title">
+                            <i class="fas fa-list me-2"></i>
+                            Управление услугами
+                        </h2>
+                        <button class="add-btn" onclick="openServiceModal()">
+                            <i class="fas fa-plus"></i>
+                            Добавить услугу
+                        </button>
+                    </div>
+
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Название</th>
+                                    <th>Категория</th>
+                                    <th>Цена</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in services %}
+                                <tr>
+                                    <td>{{ service.id }}</td>
+                                    <td>{{ service.title }}</td>
+                                    <td>
+                                        <span class="category-badge category-{{ service.category }}">
+                                            {{ service.category }}
+                                        </span>
+                                    </td>
+                                    <td>{{  "{:,.0f}".format(service.price).replace(",", " ") }} ₽</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action btn-edit" onclick="editService({{ service.id }})">
+                                                <i class="fas fa-edit"></i>
+                                                Редактировать
+                                            </button>
+                                            <button class="btn-action btn-delete" onclick="deleteService({{ service.id }})">
+                                                <i class="fas fa-trash"></i>
+                                                Удалить
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="portfolio-tab" class="tab-pane">
+                    <div class="action-header">
+                        <h2 class="tab-title">
+                            <i class="fas fa-images me-2"></i>
+                            Управление портфолио
+                        </h2>
+                        <button class="add-btn" onclick="openPortfolioModal()">
+                            <i class="fas fa-plus"></i>
+                            Добавить работу
+                        </button>
+                    </div>
+
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Изображение</th>
+                                    <th>Название</th>
+                                    <th>Категория</th>
+                                    <th>Тип мероприятия</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in portfolio_items %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>
+                                        <img src="{{ item.image_url }}" alt="{{ item.title }}" class="portfolio-thumb">
+                                    </td>
+                                    <td>{{ item.title }}</td>
+                                    <td>
+                                        <span class="category-badge category-{{ item.category }}">
+                                            {{ item.category }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.event_type or '-' }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action btn-edit" onclick="editPortfolio({{ item.id }})">
+                                                <i class="fas fa-edit"></i>
+                                                Редактировать
+                                            </button>
+                                            <button class="btn-action btn-delete" onclick="deletePortfolio({{ item.id }})">
+                                                <i class="fas fa-trash"></i>
+                                                Удалить
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="portfolioModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title" id="portfolioModalTitle">Добавить работу в портфолио</h3>
+            <button class="modal-close" onclick="closePortfolioModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="portfolioForm">
+                <input type="hidden" id="portfolioId" name="portfolioId">
+
+                <div class="form-group">
+                    <label for="portfolioTitle" class="form-label">Название работы</label>
+                    <input type="text" class="form-control" id="portfolioTitle" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolioCategory" class="form-label">Категория</label>
+                    <select class="form-select" id="portfolioCategory" name="category" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="Детский">Детский</option>
+                        <option value="Взрослый">Взрослый</option>
+                        <option value="Корпоративный">Корпоративный</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolioEventType" class="form-label">Тип мероприятия</label>
+                    <input type="text" class="form-control" id="portfolioEventType" name="event_type" placeholder="Например: День рождения, Свадьба, Корпоратив" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolioImageUrl" class="form-label">URL изображения</label>
+                    <input type="text" class="form-control" id="portfolioImageUrl" name="image_url" placeholder="/static/images/upload/portfolio/example.jpg" required>
+                    <small class="text-muted">Изображения должны быть загружены в папку /static/images/upload/portfolio/</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Предпросмотр изображения</label>
+                    <div class="image-preview">
+                        <img id="portfolioImagePreview" src="" alt="Предпросмотр" style="max-width: 200px; display: none;">
+                        <span id="portfolioImagePlaceholder" class="preview-placeholder">Изображение не выбрано</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closePortfolioModal()">Отмена</button>
+            <button type="button" class="btn-save" onclick="savePortfolio()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<div id="serviceModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title" id="serviceModalTitle">Добавить услугу</h3>
+            <button class="modal-close" onclick="closeServiceModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="serviceForm">
+                <input type="hidden" id="serviceId" name="serviceId">
+
+                <div class="form-group">
+                    <label for="serviceTitle" class="form-label">Название услуги</label>
+                    <input type="text" class="form-control" id="serviceTitle" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="serviceCategory" class="form-label">Категория</label>
+                    <select class="form-select" id="serviceCategory" name="category" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="Детский">Детский</option>
+                        <option value="Взрослый">Взрослый</option>
+                        <option value="Корпоративный">Корпоративный</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="servicePrice" class="form-label">Цена (₽)</label>
+                    <input type="number" class="form-control" id="servicePrice" name="price" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="serviceDescription" class="form-label">Описание</label>
+                    <textarea class="form-control" id="serviceDescription" name="description" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="serviceImageUrl" class="form-label">URL изображения</label>
+                    <input type="url" class="form-control" id="serviceImageUrl" name="image_url" placeholder="https://example.com/image.jpg">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeServiceModal()">Отмена</button>
+            <button type="button" class="btn-save" onclick="saveService()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<div id="newsModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title" id="newsModalTitle">Добавить новость</h3>
+            <button class="modal-close" onclick="closeNewsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="newsForm">
+                <input type="hidden" id="newsId" name="newsId">
+
+                <div class="form-group">
+                    <label for="newsTitle" class="form-label">Заголовок новости</label>
+                    <input type="text" class="form-control" id="newsTitle" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newsContent" class="form-label">Содержание</label>
+                    <textarea class="form-control" id="newsContent" name="content" rows="6" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="newsImageUrl" class="form-label">URL изображения</label>
+                    <input type="url" class="form-control" id="newsImageUrl" name="image_url" placeholder="https://example.com/image.jpg">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeNewsModal()">Отмена</button>
+            <button type="button" class="btn-save" onclick="saveNews()">Сохранить</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const servicesData = {{ services_list | tojson }};
+const newsData = {{ news_list | tojson }};
+const ordersData = {{ orders_list | tojson }};
+
+function showTab(tabName) {
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.target.classList.add('active');
+}
+
+let currentServiceId = null;
+
+function openServiceModal(serviceId = null) {
+    currentServiceId = serviceId;
+    const modal = document.getElementById('serviceModal');
+    const form = document.getElementById('serviceForm');
+    const title = document.getElementById('serviceModalTitle');
+
+    if (serviceId) {
+        const service = servicesData.find(s => s.id === serviceId);
+
+        if (!service) {
+            alert('Ошибка: услуга не найдена');
+            return;
+        }
+
+        title.textContent = 'Редактировать услугу';
+
+        const fields = ['serviceId', 'serviceTitle', 'serviceCategory', 'servicePrice', 'serviceDescription', 'serviceImageUrl'];
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.disabled = false;
+                field.readOnly = false;
+            }
+        });
+
+        document.getElementById('serviceId').value = service.id;
+        document.getElementById('serviceTitle').value = service.title;
+        document.getElementById('serviceCategory').value = service.category;
+        document.getElementById('servicePrice').value = service.price;
+        document.getElementById('serviceDescription').value = service.description;
+        document.getElementById('serviceImageUrl').value = service.image_url || '';
+    } else {
+        title.textContent = 'Добавить услугу';
+        form.reset();
+
+        const fields = ['serviceId', 'serviceTitle', 'serviceCategory', 'servicePrice', 'serviceDescription', 'serviceImageUrl'];
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            field.disabled = false;
+            field.readOnly = false;
+        });
+
+        document.getElementById('serviceId').value = '';
+    }
+
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 100);
+}
+
+function closeServiceModal() {
+    document.getElementById('serviceModal').classList.remove('show');
+    currentServiceId = null;
+}
+
+function saveService() {
+    const form = document.getElementById('serviceForm');
+    const formData = new FormData(form);
+
+    const url = currentServiceId ? `/admin/service/edit/${currentServiceId}` : '/admin/service/add';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message || 'Услуга успешно сохранена!', 'success');
+            closeServiceModal();
+            location.reload();
+        } else {
+            showNotification(data.message || 'Ошибка при сохранении услуги', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+    });
+}
+
+function editService(serviceId) {
+    openServiceModal(serviceId);
+}
+
+function deleteService(serviceId) {
+    if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
+        fetch(`/admin/service/delete/${serviceId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message || 'Услуга успешно удалена!', 'success');
+                location.reload();
+            } else {
+                showNotification(data.message || 'Ошибка при удалении услуги', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+        });
+    }
+}
+
+let currentNewsId = null;
+
+function openNewsModal(newsId = null) {
+    currentNewsId = newsId;
+    const modal = document.getElementById('newsModal');
+    const form = document.getElementById('newsForm');
+    const title = document.getElementById('newsModalTitle');
+
+    if (newsId) {
+        const news = newsData.find(n => n.id === newsId);
+        title.textContent = 'Редактировать новость';
+
+        document.getElementById('newsId').value = news.id;
+        document.getElementById('newsTitle').value = news.title;
+        document.getElementById('newsContent').value = news.content;
+        document.getElementById('newsImageUrl').value = news.image_url || '';
+    } else {
+        title.textContent = 'Добавить новость';
+        form.reset();
+        document.getElementById('newsId').value = '';
+    }
+
+    modal.classList.add('show');
+}
+
+function closeNewsModal() {
+    document.getElementById('newsModal').classList.remove('show');
+    currentNewsId = null;
+}
+
+function saveNews() {
+    const form = document.getElementById('newsForm');
+    const formData = new FormData(form);
+
+    const url = currentNewsId ? `/admin/news/edit/${currentNewsId}` : '/admin/news/add';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message || 'Новость успешно сохранена!', 'success');
+            closeNewsModal();
+            location.reload();
+        } else {
+            showNotification(data.message || 'Ошибка при сохранении новости', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+    });
+}
+
+function editNews(newsId) {
+    openNewsModal(newsId);
+}
+
+function deleteNews(newsId) {
+    if (confirm('Вы уверены, что хотите удалить эту новость?')) {
+        fetch(`/admin/news/${newsId}/delete`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message || 'Новость успешно удалена!', 'success');
+                location.reload();
+            } else {
+                showNotification(data.message || 'Ошибка при удалении новости', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+        });
+    }
+}
+
+function updateOrderStatus(orderId, status) {
+    console.log('Updating order status:', orderId, status); // Debug log
+
+    if (!orderId || !status) {
+        console.error('Invalid data:', {orderId, status});
+        showNotification('Ошибка: неверные данные для обновления статуса', 'error');
+        return;
+    }
+
+    const selectElement = event.target;
+    const originalValue = selectElement.value;
+    selectElement.disabled = true;
+
+    fetch(`/admin/order/status/${orderId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            showNotification(data.message || 'Статус заказа обновлен!', 'success');
+            const statusBadge = selectElement.closest('tr').querySelector('.status-badge');
+            if (statusBadge) {
+                statusBadge.textContent = status;
+                statusBadge.className = `status-badge status-${status.toLowerCase()}`;
+            }
+        } else {
+            showNotification(data.message || 'Ошибка при обновлении статуса', 'error');
+            selectElement.value = originalValue;
+        }
+    })
+    .catch(error => {
+        console.error('Error updating order status:', error);
+        showNotification('Произошла ошибка при обновлении статуса заказа', 'error');
+        selectElement.value = originalValue;
+    })
+    .finally(() => {
+        selectElement.disabled = false;
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'alert-success' : 'alert-danger'} position-fixed top-0 end-0 m-3`;
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            <div>${message}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        if (notification.parentElement) {
+            const bsAlert = new bootstrap.Alert(notification);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        closeServiceModal();
+        closeNewsModal();
+        closePortfolioModal();
+    }
+});
+
+let currentPortfolioId = null;
+const portfolioData = {{ portfolio_list | tojson }};
+
+function openPortfolioModal(portfolioId = null) {
+    currentPortfolioId = portfolioId;
+    const modal = document.getElementById('portfolioModal');
+    const form = document.getElementById('portfolioForm');
+    const title = document.getElementById('portfolioModalTitle');
+
+    if (portfolioId) {
+        const item = portfolioData.find(p => p.id === portfolioId);
+
+        if (!item) {
+            alert('Ошибка: запись портфолио не найдена');
+            return;
+        }
+
+        title.textContent = 'Редактировать работу';
+
+        document.getElementById('portfolioId').value = item.id;
+        document.getElementById('portfolioTitle').value = item.title;
+        document.getElementById('portfolioCategory').value = item.category;
+        document.getElementById('portfolioEventType').value = item.event_type || '';
+        document.getElementById('portfolioImageUrl').value = item.image_url;
+        updatePortfolioPreview(item.image_url);
+    } else {
+        title.textContent = 'Добавить работу в портфолио';
+        form.reset();
+        document.getElementById('portfolioId').value = '';
+        updatePortfolioPreview('');
+    }
+
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 100);
+}
+
+function closePortfolioModal() {
+    document.getElementById('portfolioModal').classList.remove('show');
+    currentPortfolioId = null;
+}
+
+function updatePortfolioPreview(url) {
+    const preview = document.getElementById('portfolioImagePreview');
+    const placeholder = document.getElementById('portfolioImagePlaceholder');
+
+    if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        preview.style.display = 'none';
+        placeholder.style.display = 'block';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const imageUrlInput = document.getElementById('portfolioImageUrl');
+    if (imageUrlInput) {
+        imageUrlInput.addEventListener('input', function() {
+            updatePortfolioPreview(this.value);
+        });
+    }
+});
+
+function savePortfolio() {
+    const form = document.getElementById('portfolioForm');
+    const formData = new FormData(form);
+
+    const url = currentPortfolioId ? `/admin/portfolio/edit/${currentPortfolioId}` : '/admin/portfolio/add';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message || 'Работа успешно сохранена!', 'success');
+            closePortfolioModal();
+            location.reload();
+        } else {
+            showNotification(data.message || 'Ошибка при сохранении', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+    });
+}
+
+function editPortfolio(portfolioId) {
+    openPortfolioModal(portfolioId);
+}
+
+function deletePortfolio(portfolioId) {
+    if (confirm('Вы уверены, что хотите удалить эту работу из портфолио?')) {
+        fetch(`/admin/portfolio/delete/${portfolioId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message || 'Работа успешно удалена!', 'success');
+                location.reload();
+            } else {
+                showNotification(data.message || 'Ошибка при удалении', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+        });
+    }
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeServiceModal();
+        closeNewsModal();
+        closePortfolioModal();
+    }
+});
+</script>
+{% endblock %}

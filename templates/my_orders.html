@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заказы{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для страницы заказов */
+    .orders-page {
+        padding: 80px 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.1rem;
+        color: #666;
+    }
+
+    .orders-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Карточка заказа */
+    .order-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .order-info {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .order-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .order-date {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .order-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Статусы заказов */
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-new {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-processing {
+        background: var(--primary-yellow);
+        color: var(--dark-blue);
+    }
+
+    .status-confirmed {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-completed {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .status-cancelled {
+        background: var(--secondary-pink);
+        color: white;
+    }
+
+    /* Услуги в заказе */
+    .order-services {
+        margin-top: 15px;
+    }
+
+    .service-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .service-name {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .service-price {
+        font-weight: bold;
+        color: var(--secondary-pink);
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Итого */
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-radius: 10px;
+        margin-top: 20px;
+        border: 1px solid var(--primary-yellow);
+    }
+
+    .total-label {
+        font-weight: bold;
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .total-value {
+        font-weight: bold;
+        font-size: 1.5rem;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Информация о мероприятии */
+    .event-info {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .event-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .event-icon {
+        color: var(--primary-yellow);
+        font-size: 1.2rem;
+    }
+
+    .event-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .event-value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Пустое состояние */
+    .empty-orders {
+        text-align: center;
+        padding: 100px 40px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: var(--primary-yellow);
+        margin-bottom: 30px;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .empty-text {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    .empty-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .empty-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Кнопка "Назад в профиль" */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 25px;
+        background: white;
+        color: #666;
+        text-decoration: none;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+    }
+
+    .back-btn:hover {
+        border-color: var(--primary-yellow);
+        color: var(--primary-yellow);
+        transform: translateX(-5px);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .orders-page {
+            padding: 60px 0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .order-card {
+            padding: 20px;
+        }
+
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .order-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .event-info {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .order-card {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .order-card:nth-child(1) { animation-delay: 0.1s; }
+    .order-card:nth-child(2) { animation-delay: 0.2s; }
+    .order-card:nth-child(3) { animation-delay: 0.3s; }
+    .order-card:nth-child(4) { animation-delay: 0.4s; }
+    .order-card:nth-child(5) { animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-page">
+    <div class="container orders-container">
+        <a href="{{ url_for('profile') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Назад в профиль
+        </a>
+
+        <div class="page-header">
+            <h1 class="page-title">Мои заказы</h1>
+            <p class="page-subtitle">
+                История ваших заказов в Gleeful: Твоя территория радости
+            </p>
+        </div>
+
+        {% if orders %}
+            {% for order_data in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-info">
+                        <div class="order-number">Заказ №{{ order_data.order.id }}</div>
+                        <div class="order-date">
+                            <i class="far fa-calendar-alt"></i>
+                            {{ order_data.order.date_created.strftime('%d.%m.%Y в %H:%M') }}
+                        </div>
+                    </div>
+                    <div class="order-price">
+                        {{  "{:,.0f}".format(order_data.order.total_price).replace(",", " ") }} ₽
+                    </div>
+                </div>
+
+                <div class="event-info">
+                    <div class="event-item">
+                        <i class="fas fa-calendar-day event-icon"></i>
+                        <div>
+                            <div class="event-label">Дата мероприятия</div>
+                            <div class="event-value">
+                                {{ order_data.order.event_date.strftime('%d %B %Y') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <i class="fas fa-phone event-icon"></i>
+                        <div>
+                            <div class="event-label">Телефон</div>
+                            <div class="event-value">{{ order_data.order.contact_phone }}</div>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <i class="fas fa-info-circle event-icon"></i>
+                        <div>
+                            <div class="event-label">Статус</div>
+                            <span class="status-badge status-{{ order_data.order.status }}">
+                                {% if order_data.order.status == 'Новый' %}
+                                    Новый
+                                {% elif order_data.order.status == 'В обработке' %}
+                                    В обработке
+                                {% elif order_data.order.status == 'Подтвержден' %}
+                                    Подтвержден
+                                {% elif order_data.order.status == 'Выполнен' or order_data.order.status == 'Завершен' %}
+                                    Выполнен
+                                {% elif order_data.order.status == 'Отменен' %}
+                                    Отменен
+                                {% else %}
+                                    {{ order_data.order.status }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-services">
+                    <div style="font-weight: bold; color: #333; margin-bottom: 15px;">
+                        <i class="fas fa-list"></i>
+                        Услуги в заказе:
+                    </div>
+                    {% for item in order_data.items %}
+                    <div class="service-item">
+                        <span class="service-name">{{ item[1].title }}</span>
+                        <span class="service-price">{{  "{:,.0f}".format(item[0].price_at_moment).replace(",", " ") }} ₽</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="order-total">
+                    <span class="total-label">Итого по заказу:</span>
+                    <span class="total-value">{{  "{:,.0f}".format(order_data.order.total_price).replace(",", " ") }} ₽</span>
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="empty-orders">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h2 class="empty-title">У вас пока нет заказов</h2>
+                <p class="empty-text">
+                    Оформите свой первый праздник в Gleeful и получите незабываемые эмоции!
+                </p>
+                <a href="{{ url_for('services') }}" class="empty-btn">
+                    <i class="fas fa-plus"></i>
+                    Перейти к услугам
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.order-card').forEach(card => {
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}

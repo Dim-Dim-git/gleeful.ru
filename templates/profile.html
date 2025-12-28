@@ -1,0 +1,972 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для личного кабинета */
+    .profile-page {
+        padding: 80px 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Заголовок страницы */
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.1rem;
+        color: #666;
+    }
+
+    /* Контейнер личного кабинета */
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Информация о пользователе */
+    .user-info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+    }
+
+    .user-info-header {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        flex-shrink: 0;
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .user-greeting {
+        flex: 1;
+    }
+
+    .user-name {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .user-status {
+        display: inline-block;
+        padding: 5px 15px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .user-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .action-btn {
+        padding: 10px 20px;
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .action-btn:hover {
+        border-color: var(--primary-yellow);
+        color: var(--primary-yellow);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+    }
+
+    .user-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .detail-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-radius: 12px;
+        color: var(--primary-yellow);
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .detail-content {
+        flex: 1;
+    }
+
+    .detail-label {
+        font-size: 0.9rem;
+        color: #999;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    /* История заказов */
+    .orders-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid var(--primary-yellow);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .section-icon {
+        color: var(--primary-yellow);
+    }
+
+    /* Пустое состояние */
+    .empty-orders {
+        text-align: center;
+        padding: 80px 40px;
+        color: #666;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--primary-yellow);
+        margin-bottom: 30px;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .empty-text {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .empty-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .empty-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Таблица заказов */
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+    }
+
+    .orders-table thead {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+    }
+
+    .orders-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .orders-table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.95rem;
+    }
+
+    .orders-table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .orders-table tbody tr:hover {
+        background-color: #fafafa;
+    }
+
+    .order-number {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .order-date {
+        color: #666;
+        white-space: nowrap;
+    }
+
+    .order-price {
+        font-weight: bold;
+        color: var(--secondary-pink);
+        font-size: 1.1rem;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Статусы заказов */
+    .status-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-new {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-processing {
+        background: var(--primary-yellow);
+        color: var(--dark-blue);
+    }
+
+    .status-confirmed {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-completed {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .status-cancelled {
+        background: var(--secondary-pink);
+        color: white;
+    }
+
+    .status-badge[data-status="Новый"] {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-badge[data-status="В обработке"] {
+        background: var(--primary-yellow);
+        color: var(--dark-blue);
+    }
+
+    .status-badge[data-status="Подтвержден"] {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    .status-badge[data-status="Выполнен"],
+    .status-badge[data-status="Завершен"] {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .status-badge[data-status="Отменен"] {
+        background: var(--secondary-pink);
+        color: white;
+    }
+
+    /* Кнопка деталей */
+    .details-btn {
+        padding: 8px 16px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+    }
+
+    .details-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .details-btn.active {
+        background: var(--tertiary-teal);
+        color: white;
+    }
+
+    /* Детали заказа */
+    .details-row {
+        display: none;
+    }
+
+    .details-row.show {
+        display: table-row;
+    }
+
+    .order-details {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 0;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .order-details.show {
+        display: block !important;
+    }
+
+    .details-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .services-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .service-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .service-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .service-name {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .service-price {
+        font-weight: bold;
+        color: var(--secondary-pink);
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-radius: 8px;
+        margin-top: 15px;
+        border: 1px solid var(--primary-yellow);
+    }
+
+    .total-label {
+        font-weight: bold;
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .total-value {
+        font-weight: bold;
+        font-size: 1.3rem;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Версия для слабовидящих */
+    .accessibility-mode .welcome-title,
+    .accessibility-mode .section-title {
+        background: #ff0 !important;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    .accessibility-mode .user-info-card,
+    .accessibility-mode .orders-section {
+        border: 2px solid #000 !important;
+        background: #fff !important;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1024px) {
+        .user-info-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .user-actions {
+            justify-content: center;
+        }
+
+        .orders-table {
+            font-size: 0.9rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 12px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-page {
+            padding: 60px 0;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+        }
+
+        .user-info-card,
+        .orders-section {
+            padding: 30px 20px;
+        }
+
+        .user-details {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .orders-table {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .orders-mobile {
+            display: block !important;
+            visibility: visible !important;
+            height: auto !important;
+        }
+
+        .order-mobile {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .order-mobile-info {
+            flex: 1;
+        }
+
+        .order-mobile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .order-mobile-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .order-mobile-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-pink);
+            background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    }
+
+    /* iPhone Safari fix - wider breakpoint */
+    @media only screen and (max-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
+        .orders-table {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        .orders-mobile {
+            display: block !important;
+            visibility: visible !important;
+        }
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            max-height: 500px;
+        }
+    }
+
+    .user-info-card {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .orders-section {
+        animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    /* Мобильная версия таблицы */
+    .orders-mobile {
+        display: none;
+    }
+
+    /* iOS Safari fix */
+    @supports (-webkit-touch-callout: none) {
+        .orders-mobile {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .orders-mobile {
+                display: block !important;
+            }
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="container profile-container">
+        <div class="page-header">
+            <h1 class="welcome-title">Здравствуйте, {{ current_user.username }}!</h1>
+            <p class="welcome-subtitle">
+                Добро пожаловать в ваш личный кабинет Gleeful: Твоя территория радости
+            </p>
+        </div>
+
+        <div class="user-info-card">
+            <div class="user-info-header">
+                <div class="user-avatar">
+                    {{ current_user.username[0].upper() }}
+                </div>
+                <div class="user-greeting">
+                    <h2 class="user-name">{{ current_user.username }}</h2>
+                    <span class="user-status">
+                        {% if current_user.is_admin %}
+                            Администратор
+                        {% else %}
+                            Клиент
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="user-actions">
+                    <a href="{{ url_for('logout') }}" class="action-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Выйти
+                    </a>
+                </div>
+            </div>
+
+            <div class="user-details">
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">{{ current_user.email }}</div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Дата регистрации</div>
+                        <div class="detail-value">
+                            {{ current_user.created_at.strftime('%d %B %Y') }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if current_user.is_admin %}
+                <div class="detail-item">
+                    <div class="detail-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Права доступа</div>
+                        <div class="detail-value">Администратор</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="orders-section">
+            <h2 class="section-title">
+                <i class="fas fa-shopping-cart section-icon"></i>
+                История заказов
+            </h2>
+
+            {% if orders %}
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>№ заказа</th>
+                            <th>Дата создания</th>
+                            <th>Дата праздника</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order_data in orders %}
+                        <tr>
+                            <td class="order-number">#{{ order_data.order.id }}</td>
+                            <td class="order-date">
+                                {{ order_data.order.date_created.strftime('%d.%m.%Y %H:%M') }}
+                            </td>
+                            <td class="order-date">
+                                {{ order_data.order.event_date.strftime('%d.%m.%Y') }}
+                            </td>
+                            <td class="order-price">
+                                {{  "{:,.0f}".format(order_data.order.total_price).replace(",", " ") }} ₽
+                            </td>
+                            <td>
+                                <span class="status-badge" data-status="{{ order_data.order.status }}">
+                                    {% if order_data.order.status == 'Новый' %}
+                                        Новый
+                                    {% elif order_data.order.status == 'В обработке' %}
+                                        В обработке
+                                    {% elif order_data.order.status == 'Подтвержден' %}
+                                        Подтвержден
+                                    {% elif order_data.order.status == 'Выполнен' or order_data.order.status == 'Завершен' %}
+                                        Выполнен
+                                    {% elif order_data.order.status == 'Отменен' %}
+                                        Отменен
+                                    {% else %}
+                                        {{ order_data.order.status }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="details-btn" onclick="toggleDetails({{ order_data.order.id }})">
+                                    <i class="fas fa-chevron-down"></i>
+                                    Детали
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr class="details-row" id="details-row-{{ order_data.order.id }}">
+                            <td colspan="6" style="padding: 0;">
+                                <div class="order-details" id="details-{{ order_data.order.id }}">
+                                    <div class="details-title">
+                                        <i class="fas fa-list"></i>
+                                        Услуги в заказе:
+                                    </div>
+                                    {% if order_data.order_items %}
+                                    <ul class="services-list">
+                                        {% for item in order_data.order_items %}
+                                        <li class="service-item">
+                                            <span class="service-name">
+                                                {{ item[1].title }}
+                                            </span>
+                                            <span class="service-price">
+                                                {{  "{:,.0f}".format(item[0].price_at_moment).replace(",", " ") }} ₽
+                                            </span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <p style="color: #666; font-style: italic;">
+                                        Услуги не найдены
+                                    </p>
+                                    {% endif %}
+
+                                    <div class="order-total">
+                                        <span class="total-label">Итого:</span>
+                                        <span class="total-value">
+                                            {{  "{:,.0f}".format(order_data.order.total_price).replace(",", " ") }} ₽
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="orders-mobile">
+                    {% for order_data in orders %}
+                    <div class="order-mobile">
+                        <div class="order-mobile-header">
+                            <div class="order-mobile-info">
+                                <div class="order-mobile-date">
+                                    Заказ №{{ order_data.order.id }} от {{ order_data.order.date_created.strftime('%d.%m.%Y') }}
+                                </div>
+                                <div class="order-mobile-price">
+                                    {{  "{:,.0f}".format(order_data.order.total_price).replace(",", " ") }} ₽
+                                </div>
+                            </div>
+                            <div class="order-mobile-actions">
+                                <span class="status-badge" data-status="{{ order_data.order.status }}">
+                                    {% if order_data.order.status == 'Новый' %}
+                                        Новый
+                                    {% elif order_data.order.status == 'В обработке' %}
+                                        В обработке
+                                    {% elif order_data.order.status == 'Подтвержден' %}
+                                        Подтвержден
+                                    {% elif order_data.order.status == 'Выполнен' or order_data.order.status == 'Завершен' %}
+                                        Выполнен
+                                    {% elif order_data.order.status == 'Отменен' %}
+                                        Отменен
+                                    {% else %}
+                                        {{ order_data.order.status }}
+                                    {% endif %}
+                                </span>
+                                <button class="details-btn" onclick="toggleDetails({{ order_data.order.id }})">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="order-details" id="details-mobile-{{ order_data.order.id }}">
+                            <div class="details-title">
+                                <i class="fas fa-calendar"></i>
+                                Дата праздника: {{ order_data.order.event_date.strftime('%d %B %Y') }}
+                            </div>
+                            {% if order_data.order_items %}
+                            <ul class="services-list">
+                                {% for item in order_data.order_items %}
+                                <li class="service-item">
+                                    <span class="service-name">
+                                        {{ item[1].title }}
+                                    </span>
+                                    <span class="service-price">
+                                        {{  "{:,.0f}".format(item[0].price_at_moment).replace(",", " ") }} ₽
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="empty-orders">
+                    <div class="empty-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3 class="empty-title">У вас пока нет заказов</h3>
+                    <p class="empty-text">
+                        Закажите свой первый праздник в Gleeful и получите незабываемые эмоции!
+                    </p>
+                    <a href="{{ url_for('services') }}" class="empty-btn">
+                        <i class="fas fa-plus"></i>
+                        Заказать праздник
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleDetails(orderId) {
+    const detailsRow = document.getElementById(`details-row-${orderId}`);
+    const detailsDesktop = document.getElementById(`details-${orderId}`);
+    const detailsMobile = document.getElementById(`details-mobile-${orderId}`);
+
+    const buttons = document.querySelectorAll(`button[onclick="toggleDetails(${orderId})"]`);
+
+    if (detailsRow) {
+        const isVisible = detailsRow.classList.contains('show');
+
+        if (isVisible) {
+            detailsRow.classList.remove('show');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fas fa-chevron-down"></i> Детали';
+            });
+        } else {
+            document.querySelectorAll('.details-row.show').forEach(el => {
+                el.classList.remove('show');
+            });
+
+            detailsRow.classList.add('show');
+            buttons.forEach(btn => {
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fas fa-chevron-up"></i> Скрыть';
+            });
+        }
+    }
+
+    if (detailsMobile) {
+        const isVisible = detailsMobile.classList.contains('show');
+
+        if (isVisible) {
+            detailsMobile.classList.remove('show');
+            const mobileBtn = detailsMobile.previousElementSibling.querySelector('.details-btn');
+            mobileBtn.classList.remove('active');
+            mobileBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        } else {
+            document.querySelectorAll('.order-details.show').forEach(el => {
+                el.classList.remove('show');
+            });
+
+            detailsMobile.classList.add('show');
+            const mobileBtn = detailsMobile.previousElementSibling.querySelector('.details-btn');
+            mobileBtn.classList.add('active');
+            mobileBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
+            }
+        });
+    }, observerOptions);
+
+    const orderItems = document.querySelectorAll('.orders-mobile .order-mobile, .orders-table tbody tr');
+    orderItems.forEach(el => observer.observe(el));
+
+    document.querySelectorAll('.details-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                const orderId = this.getAttribute('onclick').match(/\d+/)[0];
+                const detailsElement = document.getElementById(`details-${orderId}`) ||
+                                   document.getElementById(`details-mobile-${orderId}`);
+
+                if (detailsElement && detailsElement.classList.contains('show')) {
+                    detailsElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            }, 100);
+        });
+    });
+});
+</script>
+{% endblock %}

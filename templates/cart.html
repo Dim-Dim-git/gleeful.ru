@@ -1,0 +1,584 @@
+{% extends "base.html" %}
+
+{% block title %}Моя корзина{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для страницы корзины */
+    .cart-page {
+        padding: 80px 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Заголовок страницы */
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+    }
+
+    /* Пустая корзина */
+    .empty-cart {
+        text-align: center;
+        padding: 100px 20px;
+        background: #f8f9fa;
+        border-radius: 20px;
+        margin-bottom: 50px;
+    }
+
+    .empty-cart-icon {
+        font-size: 6rem;
+        color: var(--primary-yellow);
+        margin-bottom: 30px;
+        opacity: 0.5;
+    }
+
+    .empty-cart-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .empty-cart-message {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 40px;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Таблица корзины */
+    .cart-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 50px;
+    }
+
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+    }
+
+    .cart-table th {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        padding: 20px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .cart-table td {
+        padding: 25px 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .cart-table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .cart-table tbody tr:hover {
+        background-color: #fafafa;
+    }
+
+    .cart-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Ячейка с услугой */
+    .cart-service {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .cart-service-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-service-info {
+        flex: 1;
+    }
+
+    .cart-service-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .cart-service-category {
+        display: inline-block;
+        padding: 4px 12px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: lowercase;
+    }
+
+    /* Ячейка с ценой */
+    .cart-price {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--secondary-pink);
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Ячейка с кнопкой удаления */
+    .cart-remove {
+        text-align: center;
+    }
+
+    .remove-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+    }
+
+    .remove-btn:hover {
+        background: #ff3838;
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+    }
+
+    .remove-btn.loading {
+        background: #ccc;
+        cursor: default;
+    }
+
+    /* Итоговая секция */
+    .cart-summary {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        border: 2px solid #FFD700;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .summary-row:last-child {
+        margin-bottom: 0;
+        padding-top: 20px;
+        border-top: 2px solid #FFD700;
+        margin-top: 20px;
+    }
+
+    .summary-label {
+        font-weight: 600;
+        color: #666;
+    }
+
+    .summary-value {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .summary-total {
+        font-size: 2rem;
+        color: var(--secondary-pink);
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .checkout-btn {
+        display: inline-block;
+        padding: 18px 50px;
+        background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+        color: var(--dark-blue);
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        margin-top: 30px;
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .checkout-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Кнопка возврата */
+    .back-to-services {
+        display: inline-block;
+        padding: 15px 40px;
+        background: white;
+        color: var(--secondary-pink);
+        text-decoration: none;
+        border: 2px solid var(--primary-yellow);
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .back-to-services:hover {
+        background: var(--primary-yellow);
+        color: var(--dark-blue);
+        transform: translateY(-2px);
+    }
+
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        animation: slideInRight 0.3s ease-out;
+        max-width: 400px;
+    }
+
+    .notification.success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+    }
+
+    .notification.error {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+    }
+
+    /* Версия для слабовидящих */
+    .accessibility-mode .page-title,
+    .accessibility-mode .cart-table th {
+        background: #ff0 !important;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    .accessibility-mode .cart-container,
+    .accessibility-mode .cart-summary {
+        border: 2px solid #000 !important;
+        background: #fff !important;
+    }
+
+    /* Скрыть мобильную таблицу на десктопе */
+    .cart-table.mobile {
+        display: none;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1024px) {
+        .page-title {
+            font-size: 2.5rem;
+        }
+
+        .cart-table th,
+        .cart-table td {
+            padding: 15px;
+        }
+
+        .cart-service-image {
+            width: 60px;
+            height: 60px;
+        }
+
+        .cart-summary {
+            padding: 30px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cart-page {
+            padding: 60px 0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .cart-table {
+            display: none;
+        }
+
+        .cart-table.mobile {
+            display: block;
+        }
+
+        .cart-item-mobile {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item-mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .cart-item-mobile-info {
+            flex: 1;
+        }
+
+        .cart-item-mobile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .cart-item-mobile-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-pink);
+            background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+
+        .cart-summary {
+            padding: 25px;
+        }
+
+        .summary-row {
+            font-size: 1rem;
+        }
+
+        .summary-total {
+            font-size: 1.5rem;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+    }
+
+    /* Анимации */
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .cart-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .cart-summary {
+        animation: fadeInUp 0.8s ease-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Моя корзина</h1>
+            <p class="page-subtitle">Gleeful: Твоя территория радости</p>
+        </div>
+
+        {% if cart_items %}
+            <div class="cart-container">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Услуга</th>
+                            <th style="width: 25%">Цена</th>
+                            <th style="width: 25%; text-align: center;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr data-item-id="{{ item.id }}">
+                            <td>
+                                <div class="cart-service">
+                                    <img src="{{ item.image_url or 'https://static.photos/people/200x200/' ~ loop.index }}"
+                                         alt="{{ item.title }}"
+                                         class="cart-service-image">
+                                    <div class="cart-service-info">
+                                        <div class="cart-service-name">{{ item.title }}</div>
+                                        <span class="cart-service-category">{{ item.category }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="cart-price">{{  "{:,.0f}".format(item.price).replace(",", " ") }} ₽</div>
+                            </td>
+                            <td>
+                                <div class="cart-remove">
+                                    <form method="POST" action="{{ url_for('remove_from_cart', id=item.id) }}"
+                                          class="remove-form" style="display: inline;">
+                                        <button type="submit" class="remove-btn" title="Удалить из корзины">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <table class="cart-table mobile">
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>
+                                <div class="cart-item-mobile">
+                                    <div class="cart-item-mobile-header">
+                                        <div class="cart-item-mobile-info">
+                                            <div class="cart-item-mobile-name">{{ item.title }}</div>
+                                            <span class="cart-service-category">{{ item.category }}</span>
+                                        </div>
+                                        <div class="cart-item-mobile-price">
+                                            {{  "{:,.0f}".format(item.price).replace(",", " ") }} ₽
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right; margin-top: 15px;">
+                                        <form method="POST" action="{{ url_for('remove_from_cart', id=item.id) }}"
+                                              class="remove-form" style="display: inline;">
+                                            <button type="submit" class="remove-btn" title="Удалить из корзины">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span class="summary-label">Количество услуг:</span>
+                    <span class="summary-value">{{ cart_items|length }} {{ 'штук' if cart_items|length > 4 else 'штуки' if cart_items|length > 1 else 'штука' }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Доставка:</span>
+                    <span class="summary-value">Бесплатно</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Итого:</span>
+                    <span class="summary-total">{{  "{:,.0f}".format(total).replace(",", " ") }} ₽</span>
+                </div>
+                <a href="{{ url_for('checkout') }}" class="checkout-btn">
+                    <i class="fas fa-shopping-cart"></i> Оформить заказ
+                </a>
+            </div>
+
+        {% else %}
+            <div class="empty-cart">
+                <div class="empty-cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h2 class="empty-cart-title">Корзина пуста</h2>
+                <p class="empty-cart-message">
+                    Добавьте услуги Gleeful в корзину, чтобы сделать ваш праздник еще более радостным!
+                </p>
+                <a href="{{ url_for('services') }}" class="back-to-services">
+                    <i class="fas fa-arrow-left"></i> К услугам
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const removeForms = document.querySelectorAll('.remove-form');
+
+    removeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const button = this.querySelector('button[type="submit"]');
+            const row = this.closest('tr') || this.closest('.cart-item-mobile');
+            const originalContent = button.innerHTML;
+
+            button.classList.add('loading');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+
+            row.style.transition = 'all 0.3s ease';
+            row.style.transform = 'translateX(-100%)';
+            row.style.opacity = '0';
+
+            setTimeout(() => {
+                this.submit();
+            }, 300);
+        });
+    });
+});
+</script>
+{% endblock %}
